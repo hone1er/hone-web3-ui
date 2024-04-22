@@ -7,7 +7,16 @@ import { normalize } from 'viem/ens'
 type RecipientInputProps = {
   onRecipientChange: (address: string, isValid: boolean) => void
 }
+import { http, createConfig } from 'wagmi'
+import { mainnet, sepolia } from 'wagmi/chains'
 
+export const config = createConfig({
+  chains: [mainnet, sepolia],
+  transports: {
+    [mainnet.id]: http(),
+    [sepolia.id]: http(),
+  },
+})
 export const RecipientInput = ({ onRecipientChange }: RecipientInputProps) => {
   const [isValidToAddress, setIsValidToAddress] = useState<boolean>(false)
   const [rawTokenAddress, setRawTokenAddress] = useState<string>('')
@@ -20,6 +29,7 @@ export const RecipientInput = ({ onRecipientChange }: RecipientInputProps) => {
   }
   const { data: ensAddy } = useEnsAddress({
     name: name,
+    config: config,
   })
 
   const handleToAdressInput = (_to: string) => {
@@ -30,6 +40,8 @@ export const RecipientInput = ({ onRecipientChange }: RecipientInputProps) => {
     setRawTokenAddress(_to)
   }
 
+  console.log('🚀 ~ RecipientInput ~ name:', name)
+  console.log('🚀 ~ RecipientInput ~ ensAddy:', ensAddy)
   useEffect(() => {
     if (ensAddy) {
       onRecipientChange(ensAddy, true)

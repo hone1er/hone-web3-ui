@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react'
 import { parseEther, formatEther, isAddress } from 'viem'
 import { useToast } from '@/context/Toaster'
 import Ethereum from '@/assets/icons/ethereum.png'
-import { RecipientInput } from '../../../components/RecipientInput'
+import { EthAddressInput } from '@/components/EthAddressInput'
 
 type Address = `0x${string}` | undefined
 
@@ -75,7 +75,11 @@ export default function SendEther() {
     <div className='flex-column align-center '>
       <h1 className='text-xl'>Send Ether</h1>
       <div className='flex align-end md:grid-cols-1 lg:grid-cols-2 gap-4 '>
-        <RecipientInput onRecipientChange={handleToAdressInput} />
+        <EthAddressInput
+          onRecipientChange={handleToAdressInput}
+          onRawInputChange={() => {}}
+          label='Recipient address'
+        />
         <div className='flex-col justify-end m-2'>
           <div className='stats shadow join-item mb-2 bg-[#282c33]'>
             <div className='stat '>
