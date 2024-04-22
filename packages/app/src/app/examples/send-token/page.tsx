@@ -1,10 +1,18 @@
 'use client'
-import { useAccount, useBalance, useSimulateContract, useWriteContract, useWaitForTransactionReceipt } from 'wagmi'
+import {
+  useAccount,
+  useBalance,
+  useSimulateContract,
+  useWriteContract,
+  useWaitForTransactionReceipt,
+  useEnsAddress,
+} from 'wagmi'
 import { erc20Abi, formatEther, isAddress } from 'viem'
 import { useState, useEffect } from 'react'
 import { parseEther } from 'viem'
 import { useToast } from '@/context/Toaster'
 import Token from '@/assets/icons/token.png'
+import { normalize } from 'viem/ens'
 
 type Address = `0x${string}` | undefined
 
@@ -12,6 +20,7 @@ export default function SendToken() {
   const [to, setTo] = useState<Address>(undefined)
   const [amount, setAmount] = useState('0.01')
   const [tokenAddress, setTokenAddress] = useState<Address>(undefined)
+  const [rawTokenAddress, setRawTokenAddress] = useState<string>('')
   const [isValidTokenAddress, setIsValidTokenAddress] = useState<boolean>(false)
   const [isValidToAddress, setIsValidToAddress] = useState<boolean>(false)
 
@@ -28,6 +37,16 @@ export default function SendToken() {
     abi: erc20Abi,
     functionName: 'transfer',
     args: [to!, parseEther(amount)],
+  })
+
+  let name
+  try {
+    name = normalize(rawTokenAddress!)
+  } catch (e) {
+    console.error(e)
+  }
+  const { data: ensAddy } = useEnsAddress({
+    name: name,
   })
 
   const { data, writeContract } = useWriteContract()
@@ -63,8 +82,10 @@ export default function SendToken() {
 
   const handleToAdressInput = (to: string) => {
     if (to.startsWith('0x')) setTo(to as `0x${string}`)
-    else setTo(`0x${to}`)
+    else setTo(`0x{to}`)
     setIsValidToAddress(isAddress(to))
+    console.log('🚀 ~ handleToAdressInput ~ to:', to)
+    setRawTokenAddress(to)
   }
 
   useEffect(() => {
@@ -107,15 +128,22 @@ export default function SendToken() {
               <div className='label'>
                 <span className='label-text'>Recipient address</span>
               </div>
-              <input
-                type='text'
-                placeholder='0x...'
-                className={`input input-bordered w-full max-w-xs ${
-                  !isValidToAddress && to != undefined ? 'input-error' : ''
-                }`}
-                onChange={(e) => handleToAdressInput(e.target.value)}
-              />
+              <div className='has-tooltip'>
+                <span
+                  className={`${isAddress(ensAddy ?? '') ? 'display' : 'hidden'} tooltip rounded shadow-lg p-1 bg-gray-100 text-black -mt-8`}>
+                  {ensAddy}
+                </span>
+                <input
+                  type='text'
+                  placeholder='0x...'
+                  className={`input input-bordered w-full max-w-xs ${
+                    !isValidToAddress && to != undefined && !ensAddy ? 'input-error' : ''
+                  }`}
+                  onChange={(e) => handleToAdressInput(e.target.value)}
+                />
+              </div>
             </label>
+            {/* dropdown with the ensAddy so the user can select it as the new to address */}
             <label className='form-control w-full max-w-xs'>
               <div className='label'>
                 <span className='label-text'>Number of tokens to send</span>
