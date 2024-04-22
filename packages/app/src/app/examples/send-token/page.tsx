@@ -1,26 +1,17 @@
 'use client'
-import {
-  useAccount,
-  useBalance,
-  useSimulateContract,
-  useWriteContract,
-  useWaitForTransactionReceipt,
-  useEnsAddress,
-} from 'wagmi'
+import { useAccount, useBalance, useSimulateContract, useWriteContract, useWaitForTransactionReceipt } from 'wagmi'
 import { erc20Abi, formatEther, isAddress } from 'viem'
 import { useState, useEffect } from 'react'
 import { parseEther } from 'viem'
 import { useToast } from '@/context/Toaster'
 import Token from '@/assets/icons/token.png'
-import { normalize } from 'viem/ens'
-
+import { RecipientInput } from '../../../components/RecipientInput'
 type Address = `0x${string}` | undefined
 
 export default function SendToken() {
   const [to, setTo] = useState<Address>(undefined)
   const [amount, setAmount] = useState('0.01')
   const [tokenAddress, setTokenAddress] = useState<Address>(undefined)
-  const [rawTokenAddress, setRawTokenAddress] = useState<string>('')
   const [isValidTokenAddress, setIsValidTokenAddress] = useState<boolean>(false)
   const [isValidToAddress, setIsValidToAddress] = useState<boolean>(false)
 
@@ -37,16 +28,6 @@ export default function SendToken() {
     abi: erc20Abi,
     functionName: 'transfer',
     args: [to!, parseEther(amount)],
-  })
-
-  let name
-  try {
-    name = normalize(rawTokenAddress!)
-  } catch (e) {
-    console.error(e)
-  }
-  const { data: ensAddy } = useEnsAddress({
-    name: name,
   })
 
   const { data, writeContract } = useWriteContract()
@@ -78,14 +59,6 @@ export default function SendToken() {
     if (token.startsWith('0x')) setTokenAddress(token as `0x${string}`)
     else setTokenAddress(`0x${token}`)
     setIsValidTokenAddress(isAddress(token))
-  }
-
-  const handleToAdressInput = (to: string) => {
-    if (to.startsWith('0x')) setTo(to as `0x${string}`)
-    else setTo(`0x{to}`)
-    setIsValidToAddress(isAddress(to))
-    console.log('🚀 ~ handleToAdressInput ~ to:', to)
-    setRawTokenAddress(to)
   }
 
   useEffect(() => {
@@ -123,40 +96,12 @@ export default function SendToken() {
 
       {isValidTokenAddress && balanceData && (
         <div className='align-end grid md:grid-cols-1 lg:grid-cols-2 gap-4 mt-10'>
-          <div className='flex-col m-2 '>
-            <label className='form-control w-full max-w-xs'>
-              <div className='label'>
-                <span className='label-text'>Recipient address</span>
-              </div>
-              <div className='has-tooltip'>
-                <span
-                  className={`${isAddress(ensAddy ?? '') ? 'display' : 'hidden'} tooltip rounded shadow-lg p-1 bg-gray-100 text-black -mt-8`}>
-                  {ensAddy}
-                </span>
-                <input
-                  type='text'
-                  placeholder='0x...'
-                  className={`input input-bordered w-full max-w-xs ${
-                    !isValidToAddress && to != undefined && !ensAddy ? 'input-error' : ''
-                  }`}
-                  onChange={(e) => handleToAdressInput(e.target.value)}
-                />
-              </div>
-            </label>
-            {/* dropdown with the ensAddy so the user can select it as the new to address */}
-            <label className='form-control w-full max-w-xs'>
-              <div className='label'>
-                <span className='label-text'>Number of tokens to send</span>
-              </div>
-              <input
-                type='text'
-                placeholder='0.01'
-                value={amount}
-                className='input input-bordered w-full max-w-xs'
-                onChange={(e) => setAmount(e.target.value)}
-              />
-            </label>
-          </div>
+          <RecipientInput
+            onRecipientChange={(address, isValid) => {
+              setTo(address as `0x${string}`)
+              setIsValidToAddress(isValid)
+            }}
+          />
           <div className='flex-col justify-end m-2'>
             <div className='stats shadow join-item mb-2 bg-[#282c33]'>
               <div className='stat '>

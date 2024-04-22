@@ -1,9 +1,10 @@
 'use client'
 import { useAccount, useBalance, useEstimateGas, useSendTransaction, useWaitForTransactionReceipt } from 'wagmi'
 import { useState, useEffect } from 'react'
-import { parseEther, formatEther, isAddress } from 'viem'
+import { parseEther, formatEther } from 'viem'
 import { useToast } from '@/context/Toaster'
 import Ethereum from '@/assets/icons/ethereum.png'
+import { RecipientInput } from '../../../components/RecipientInput'
 
 type Address = `0x${string}` | undefined
 
@@ -49,9 +50,7 @@ export default function SendEther() {
   }
 
   const handleToAdressInput = (to: string) => {
-    if (to.startsWith('0x')) setTo(to as `0x${string}`)
-    else setTo(`0x${to}`)
-    setIsValidToAddress(isAddress(to))
+    setTo(to as Address)
   }
 
   useEffect(() => {
@@ -75,33 +74,7 @@ export default function SendEther() {
     <div className='flex-column align-center '>
       <h1 className='text-xl'>Send Ether</h1>
       <div className='flex align-end md:grid-cols-1 lg:grid-cols-2 gap-4 '>
-        <div className='flex-col m-2 '>
-          <label className='form-control w-full max-w-xs'>
-            <div className='label'>
-              <span className='label-text'>Recipient address</span>
-            </div>
-            <input
-              type='text'
-              placeholder='0x...'
-              className={`input input-bordered w-full max-w-xs ${
-                !isValidToAddress && to != undefined ? 'input-error' : ''
-              }`}
-              onChange={(e) => handleToAdressInput(e.target.value)}
-            />
-          </label>
-          <label className='form-control w-full max-w-xs'>
-            <div className='label'>
-              <span className='label-text'>Number of ethers to send</span>
-            </div>
-            <input
-              type='text'
-              placeholder='0.01'
-              value={amount}
-              className='input input-bordered w-full max-w-xs'
-              onChange={(e) => setAmount(e.target.value)}
-            />
-          </label>
-        </div>
+        <RecipientInput onRecipientChange={handleToAdressInput} />
         <div className='flex-col justify-end m-2'>
           <div className='stats shadow join-item mb-2 bg-[#282c33]'>
             <div className='stat '>
