@@ -98,7 +98,7 @@ export default function SendToken() {
         type: 'error',
       })
     }
-  }, [txSuccess, txError])
+  }, [txSuccess, txError, showToast])
 
   const formatBalance = (balance: bigint) => {
     return parseFloat(formatEther(balance, 'wei')).toFixed(4)
@@ -122,7 +122,7 @@ export default function SendToken() {
       </label>
 
       {isValidTokenAddress && balanceData && (
-        <div className='flex align-end grid md:grid-cols-1 lg:grid-cols-2 gap-4 mt-10'>
+        <div className='align-end grid md:grid-cols-1 lg:grid-cols-2 gap-4 mt-10'>
           <div className='flex-col m-2 '>
             <label className='form-control w-full max-w-xs'>
               <div className='label'>
@@ -173,7 +173,7 @@ export default function SendToken() {
               </div>
             </div>
             <button
-              className='btn btn-wide w-[100%] '
+              className='btn btn-wide '
               onClick={handleSendTransation}
               disabled={!isValidToAddress || !address || Boolean(estimateError) || amount === ''}>
               {isLoading ? <span className='loading loading-dots loading-sm'></span> : 'Send ethers'}
