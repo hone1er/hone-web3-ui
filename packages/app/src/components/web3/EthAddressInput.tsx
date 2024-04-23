@@ -1,11 +1,12 @@
 'use client'
 import { useState, useEffect } from 'react'
 import { isAddress } from 'viem'
-import { normalize } from 'viem/ens'
+import { getEnsAvatar, normalize } from 'viem/ens'
 import { mainnet, sepolia } from 'wagmi/chains'
-import { createConfig, useEnsAddress, http } from 'wagmi'
-import { Input } from './ui/input'
-import { Separator } from './ui/separator'
+import { createConfig, useEnsAddress, http, useEnsAvatar } from 'wagmi'
+import { Input } from '../ui/input'
+import { Separator } from '../ui/separator'
+import Image from 'next/image'
 type EthAddressInputProps = {
   label: string
   onRecipientChange: (address: string, isValid: boolean) => void
@@ -20,7 +21,7 @@ export const config = createConfig({
 })
 
 function truncateAddress(address: string) {
-  return `${address.slice(0, 14)}...${address.slice(-16)}`
+  return `${address.slice(0, 8)}...${address.slice(-8)}`
 }
 
 export const EthAddressInput = ({ label, onRecipientChange, onRawInputChange }: EthAddressInputProps) => {
@@ -34,6 +35,11 @@ export const EthAddressInput = ({ label, onRecipientChange, onRawInputChange }: 
     console.error(e)
   }
   const { data: ensAddy } = useEnsAddress({
+    name: name,
+    config: config,
+  })
+
+  const { data: ensAvatar } = useEnsAvatar({
     name: name,
     config: config,
   })
@@ -68,7 +74,7 @@ export const EthAddressInput = ({ label, onRecipientChange, onRawInputChange }: 
         <Input
           type='text'
           placeholder='0x...'
-          className={` w-full max-w-xs ${!isValidToAddress && rawTokenAddress && !ensAddy ? 'focus-visible:ring-red-500 ' : ''}`}
+          className={`w-full max-w-xs ${!isValidToAddress && rawTokenAddress && !ensAddy ? 'focus-visible:ring-red-400 ' : isValidToAddress ? 'focus-visible:ring-green-300' : ''}`}
           value={rawTokenAddress}
           onChange={(e) => handleToAdressInput(e.target.value)}
         />
@@ -76,14 +82,24 @@ export const EthAddressInput = ({ label, onRecipientChange, onRawInputChange }: 
           <>
             {' '}
             <Separator />
-            <span
+            <button
               onClick={() => {
                 setRawTokenAddress(ensAddy ?? '')
                 setIsValidToAddress(true)
               }}
-              className={`block relative z-40 w-full px-4 py-2 rounded shadow-lg bg-gray-50 text-black  hover:cursor-pointer`}>
-              {truncateAddress(ensAddy ?? '')}
-            </span>{' '}
+              className={`flex flex-row relative z-40 w-full max-w-[240px] justify-between px-4 py-2 rounded shadow-lg bg-gray-50 text-black items-center hover:cursor-pointer hover:bg-gray-100 transition duration-300 ease-in-out transform hover:scale-105`}>
+              <Image
+                width={320}
+                height={320}
+                content='responsive'
+                src={ensAvatar ?? ''}
+                alt='avatar'
+                placeholder='blur'
+                blurDataURL='/assets/icons/ethereum.png'
+                className={`${ensAvatar ? 'block' : 'hidden'} rounded-full min-w-8 min-h-8 w-8 h-8 object-cover relative`}
+              />
+              <span>{truncateAddress(ensAddy ?? '')}</span>
+            </button>
           </>
         ) : null}
       </div>

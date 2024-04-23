@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react'
 import { parseEther, formatEther, isAddress } from 'viem'
 import { useToast } from '@/context/Toaster'
 import Ethereum from '@/assets/icons/ethereum.png'
-import { EthAddressInput } from '@/components/EthAddressInput'
+import { EthAddressInput } from '@/components/web3/EthAddressInput'
 
 type Address = `0x${string}` | undefined
 
@@ -72,7 +72,7 @@ export default function SendEther() {
   }
 
   return (
-    <div className='flex-column align-center '>
+    <div className='flex-column align-center items-center'>
       <h1 className='text-xl'>Send Ether</h1>
       <div className='flex align-end md:grid-cols-1 lg:grid-cols-2 gap-4 '>
         <EthAddressInput
